@@ -1,0 +1,1 @@
+A simple url shortner app using django
