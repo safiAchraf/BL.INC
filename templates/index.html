@@ -1,0 +1,132 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link  type="text/css" rel="stylesheet" href="{% static 'style.css' %}">
+    <title>BL.INC</title>
+</head>
+<body style="margin: 0px;padding: 0px;">
+
+
+    <header>
+        <div class="title">
+            <h1 >BL.INC</h1>
+        </div>
+
+        <div class="didicas">
+            <button class="button-28" role="button">Log in</button>
+            <button class="button-28" role="button">Register</button>
+        </div>
+    </header>
+    <section class="search">
+        <h2 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">Paste Your LOOOOONG URL Here</h2>
+        <form method="post" id="submit">
+            {% csrf_token %}
+                <div class="input">
+                    <img src="{% static 'icon_link.png' %}" alt="search-icon" width="20px" height="20px" class="mug">
+                    <input type="text" id="long_url" name="long_url" placeholder="Enter Your URL" class="search-bar">
+                    
+                    <input type="submit" class="submit" value="Shorten">
+                    
+
+                </div>
+            
+
+        </form>
+            
+    </section>
+    <br><br><br>
+    
+    
+    <section class="result"  >
+        <span style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;display: inline;">Your short url is:</span>
+        
+        <div class="input2">
+
+            <img src="{% static 'icon_link.png' %}" alt="search-icon" width="20px" height="20px" class="mug">
+            <input type="text" name="q"  class="search-bar">
+            
+            <button class="submit2">Copy</button>
+            
+
+        </div>
+            
+
+        
+            
+    </section>
+
+
+
+
+    <footer>
+        <img src="{% static 'wave.svg' %}" >
+    
+
+        
+    </footer>
+</body>
+<style>
+    .result {
+        display: none;
+    }
+</style>
+<script>
+
+
+
+document.querySelector('.submit2').addEventListener('click',()=>{
+    document.querySelector('.input2 input').select();
+    document.execCommand('copy');
+    alert('Copied to clipboard');
+});
+
+//empty .input .serach-bar when submit
+
+function isValidURL(url) {
+    // Regular expression for URL validation
+    const urlPattern = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w.-]*)*\/?$/;
+  
+    // Test if the input matches the URL pattern
+    return urlPattern.test(url);
+}
+//validate if input is empty or not a url
+document.getElementById('submit').addEventListener('submit', (event) => {
+    event.preventDefault(); // Prevent the default form submission behavior
+    let input = document.querySelector('.search-bar').value.toLowerCase();
+    if (input === '') {
+        alert('Please enter a URL');
+    } else if (!isValidURL(input)) {
+        alert('Please enter a valid URL');
+    } else {
+        // Form data is valid, submit it to the server using Fetch API
+        fetch('/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('input[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({ long_url: input }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.querySelector('.result').style.display = data['display'] ? 'flex' : 'none';
+            document.querySelector('.input2 input').value = data['short_url'] || '';
+            // Handle the response from the server here
+            // For example, display the shortened URL returned by the server
+            console.log('Response from server:', data);
+            // You can show the shortened URL on the page or perform other actions based on the response
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // Handle any error that occurs during the fetch request
+        });
+
+        // Empty the input after successful submission (optional)
+        document.querySelector('.search-bar').value = '';
+    }
+});
+</script>
+</html>
